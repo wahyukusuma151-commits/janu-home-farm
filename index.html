@@ -93,9 +93,9 @@
                 <h2 class="text-2xl font-bold text-gray-800">Manajemen Indukan</h2>
                 <div class="bg-white p-6 rounded-2xl shadow">
                     <input type="text" id="pig-name" placeholder="Nama Induk" class="w-full p-3 border rounded-lg mb-2">
-                    <label class="block text-sm text-gray-600 mb-1">Tanggal Kawin:</label>
+                    <label class="block text-sm text-gray-600 mb-1 font-semibold">Tanggal Kawin:</label>
                     <input type="date" id="mating-date" class="w-full p-3 border rounded-lg mb-2">
-                    <button onclick="addPig()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">SIMPAN</button>
+                    <button onclick="addPig()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">TAMBAH INDUKAN</button>
                 </div>
                 <div id="pig-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
@@ -109,7 +109,7 @@
                         <input type="number" id="anak-male" placeholder="Jumlah Jantan" class="w-full p-3 border rounded-lg">
                         <input type="number" id="anak-female" placeholder="Jumlah Betina" class="w-full p-3 border rounded-lg">
                     </div>
-                    <button onclick="addAnak()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">SIMPAN KELAHIRAN</button>
+                    <button onclick="addAnak()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">TAMBAH KELAHIRAN</button>
                 </div>
                 <div id="anak-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
@@ -175,11 +175,30 @@
 
         function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
 
-        // Core Functions
-        function addPig() { state.pigs.push({ id: Date.now(), name: document.getElementById('pig-name').value, date: document.getElementById('mating-date').value }); saveData(); }
-        function addAnak() { state.anakBabi.push({ id: Date.now(), parent: document.getElementById('anak-induk-ref').value, birthDate: document.getElementById('anak-birth-date').value, male: parseInt(document.getElementById('anak-male').value) || 0, female: parseInt(document.getElementById('anak-female').value) || 0 }); saveData(); }
-        function addPakan() { const qty = parseInt(document.getElementById('pakan-qty').value); const price = parseInt(document.getElementById('pakan-price').value); state.pakan.push({ id: Date.now(), name: document.getElementById('pakan-name').value, qty, price }); state.finance.push({ id: Date.now(), desc: 'Beli Pakan: ' + document.getElementById('pakan-name').value, amount: price, type: 'expense' }); saveData(); }
-        function addFinance() { state.finance.push({ id: Date.now(), desc: document.getElementById('fin-desc').value, amount: parseInt(document.getElementById('fin-amount').value), type: document.getElementById('fin-type').value }); saveData(); }
+        // Logic for Data Operations
+        function addPig() { 
+            const name = document.getElementById('pig-name').value;
+            const date = document.getElementById('mating-date').value;
+            if(!name || !date) return alert("Lengkapi data!");
+            state.pigs.push({ id: Date.now(), name, date }); saveData(); 
+        }
+
+        function addAnak() { 
+            state.anakBabi.push({ id: Date.now(), parent: document.getElementById('anak-induk-ref').value, birthDate: document.getElementById('anak-birth-date').value, male: parseInt(document.getElementById('anak-male').value) || 0, female: parseInt(document.getElementById('anak-female').value) || 0 }); saveData(); 
+        }
+
+        function addPakan() { 
+            const qty = parseInt(document.getElementById('pakan-qty').value); 
+            const price = parseInt(document.getElementById('pakan-price').value); 
+            state.pakan.push({ id: Date.now(), name: document.getElementById('pakan-name').value, qty, price }); 
+            state.finance.push({ id: Date.now(), desc: 'Beli Pakan: ' + document.getElementById('pakan-name').value, amount: price, type: 'expense' }); 
+            saveData(); 
+        }
+
+        function addFinance() { 
+            state.finance.push({ id: Date.now(), desc: document.getElementById('fin-desc').value, amount: parseInt(document.getElementById('fin-amount').value), type: document.getElementById('fin-type').value }); 
+            saveData(); 
+        }
 
         function exportFinancePDF() {
             const { jsPDF } = window.jspdf;
@@ -205,12 +224,32 @@
 
         function deleteItem(list, id) { if(confirm('Hapus data ini?')) { state[list] = state[list].filter(i => i.id !== id); saveData(); } }
         
+        // Modal handling for selling (Replaces browser prompt)
+        function jualItem(list, id, name) {
+            const modal = document.getElementById('modal');
+            const body = document.getElementById('modal-body');
+            const confirmBtn = document.getElementById('modal-confirm');
+            modal.classList.remove('hidden');
+            document.getElementById('modal-title').innerText = 'Jual ' + name;
+            body.innerHTML = `<input type="number" id="m-sell-price" placeholder="Harga Jual (Rp)" class="w-full p-2 border rounded">`;
+            confirmBtn.onclick = () => {
+                const price = parseInt(document.getElementById('m-sell-price').value);
+                if(price) {
+                    state.finance.push({ id: Date.now(), desc: 'Penjualan: ' + name, amount: price, type: 'income' });
+                    state[list] = state[list].filter(i => i.id !== id);
+                    closeModal();
+                    saveData();
+                }
+            };
+        }
+
         function editItem(list, id) {
             const item = state[list].find(i => i.id === id);
             const modal = document.getElementById('modal');
             const body = document.getElementById('modal-body');
             const confirmBtn = document.getElementById('modal-confirm');
             modal.classList.remove('hidden');
+            document.getElementById('modal-title').innerText = 'Edit Data';
             
             if(list === 'pigs') {
                 body.innerHTML = `<input type="text" id="edit-name" value="${item.name}" class="w-full p-2 border rounded"><input type="date" id="edit-date" value="${item.date}" class="w-full p-2 border rounded">`;
@@ -221,15 +260,6 @@
             } else if(list === 'pakan') {
                 body.innerHTML = `<input type="text" id="edit-pakan-name" value="${item.name}" class="w-full p-2 border rounded"><input type="number" id="edit-pakan-qty" value="${item.qty}" class="w-full p-2 border rounded">`;
                 confirmBtn.onclick = () => { item.name = document.getElementById('edit-pakan-name').value; item.qty = parseInt(document.getElementById('edit-pakan-qty').value); closeModal(); saveData(); };
-            }
-        }
-
-        function jualItem(list, id, name) {
-            const price = prompt("Masukkan harga jual untuk " + name + ":");
-            if(price) {
-                state.finance.push({ id: Date.now(), desc: 'Penjualan: ' + name, amount: parseInt(price), type: 'income' });
-                state[list] = state[list].filter(i => i.id !== id);
-                saveData();
             }
         }
 
@@ -251,12 +281,7 @@
                         barThickness: 60
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
@@ -273,17 +298,21 @@
                 const mating = new Date(p.date);
                 const birth = new Date(mating);
                 birth.setDate(birth.getDate() + 114);
-                return `<div class="bg-white p-4 rounded-xl border flex flex-col justify-between gap-2 shadow-sm">
-                    <div><b class="text-lg text-emerald-900">${p.name}</b><br><small class="text-gray-500">Kawin: ${p.date}</small><br><span class="text-emerald-700 font-bold text-sm">Est. Lahir: ${birth.toISOString().split('T')[0]}</span></div>
-                    <div class="flex gap-2"><button onclick="editItem('pigs', ${p.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm">Edit</button><button onclick="jualItem('pigs', ${p.id}, '${p.name}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1">Jual</button><button onclick="deleteItem('pigs', ${p.id})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-sm">Hapus</button></div>
+                return `<div class="bg-white p-4 rounded-xl border flex flex-col justify-between gap-2 shadow-sm border-l-4 border-l-emerald-600">
+                    <div><b class="text-lg text-emerald-900">${p.name}</b><br><small class="text-gray-500 font-semibold">TGL KAWIN: ${p.date}</small><br><span class="text-emerald-700 font-bold text-xs bg-emerald-50 px-2 py-1 rounded">EST. LAHIR: ${birth.toISOString().split('T')[0]}</span></div>
+                    <div class="flex gap-2 mt-2"><button onclick="editItem('pigs', ${p.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm flex-1">Edit</button><button onclick="jualItem('pigs', ${p.id}, '${p.name}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1 font-bold">Jual</button></div>
+                    <button onclick="deleteItem('pigs', ${p.id})" class="text-red-400 text-xs text-center mt-1 underline">Hapus</button>
                 </div>`;
             }).join('');
 
             document.getElementById('anak-list').innerHTML = state.anakBabi.map(a => {
                 const b = new Date(a.birthDate); b.setDate(b.getDate() + 35);
-                return `<div class="bg-white p-4 rounded-xl border shadow-sm">
-                    <b class="text-emerald-900">Induk: ${a.parent}</b><br><span class="text-gray-600">J: ${a.male} | B: ${a.female}</span><br><span class="text-orange-600 text-sm font-bold block mt-1">Est. Sapih: ${b.toISOString().split('T')[0]}</span>
-                    <div class="flex gap-2 mt-3"><button onclick="editItem('anakBabi', ${a.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm">Edit</button><button onclick="jualItem('anakBabi', ${a.id}, 'Anak Babi')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1">Jual</button><button onclick="deleteItem('anakBabi', ${a.id})" class="text-red-500 text-sm">Hapus</button></div>
+                return `<div class="bg-white p-4 rounded-xl border shadow-sm border-l-4 border-l-blue-600">
+                    <b class="text-emerald-900 block">${a.parent}</b>
+                    <div class="flex gap-4 text-sm mt-1"><span class="text-blue-600 font-bold">J: ${a.male}</span><span class="text-pink-600 font-bold">B: ${a.female}</span></div>
+                    <span class="text-orange-600 text-xs font-bold block mt-2 bg-orange-50 px-2 py-1 rounded">EST. SAPIH: ${b.toISOString().split('T')[0]}</span>
+                    <div class="flex gap-2 mt-3"><button onclick="editItem('anakBabi', ${a.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm flex-1">Edit</button><button onclick="jualItem('anakBabi', ${a.id}, 'Anak Babi')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1 font-bold">Jual</button></div>
+                    <button onclick="deleteItem('anakBabi', ${a.id})" class="text-red-400 text-xs text-center block w-full mt-2 underline">Hapus</button>
                 </div>`;
             }).join('');
 
