@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JANU HOME FARM - Profesional</title>
+    <title>JANU HOME FARM</title>
+    
+    <!-- PWA Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Janu Farm">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/065f46/white?text=🐷">
+    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22JANU%20HOME%20FARM%22%2C%22short_name%22%3A%22JanuFarm%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2F065f46%2Fwhite%3Ftext%3D%25F0%259F%2590%25B7%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -69,7 +77,6 @@
                 </div>
             </div>
 
-            <!-- Breeding Tab -->
             <div id="breeding" class="tab-content space-y-6">
                 <h2 class="text-2xl font-bold text-gray-800">Manajemen Indukan</h2>
                 <div class="bg-white p-6 rounded-2xl shadow">
@@ -80,7 +87,6 @@
                 <div id="pig-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- Anak Babi Tab -->
             <div id="anak-babi" class="tab-content space-y-6">
                 <h2 class="text-2xl font-bold text-gray-800">Data Anak Babi</h2>
                 <div class="bg-white p-6 rounded-2xl shadow">
@@ -95,7 +101,6 @@
                 <div id="anak-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- Pakan Tab -->
             <div id="pakan" class="tab-content space-y-6">
                 <h2 class="text-2xl font-bold text-gray-800">Manajemen Pakan</h2>
                 <div class="bg-white p-6 rounded-2xl shadow mb-6">
@@ -107,7 +112,6 @@
                 <div id="pakan-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- Finance Tab -->
             <div id="finance" class="tab-content space-y-6">
                 <h2 class="text-2xl font-bold text-gray-800">Keuangan</h2>
                 <button onclick="exportCSV()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition">Download Laporan (CSV)</button>
