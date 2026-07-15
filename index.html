@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Janu Farm">
-    <!-- Ikon Aplikasi -->
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/065f46/white?text=JF">
     <link rel="icon" href="https://placehold.co/192x192/065f46/white?text=JF">
     <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22JANU%20HOME%20FARM%22%2C%22short_name%22%3A%22JanuFarm%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2F065f46%2Fwhite%3Ftext%3DJF%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
@@ -116,6 +115,19 @@
 
             <div id="finance" class="tab-content space-y-6">
                 <h2 class="text-2xl font-bold text-gray-800">Keuangan</h2>
+                
+                <!-- Form Tambah Saldo / Transaksi -->
+                <div class="bg-white p-6 rounded-2xl shadow">
+                    <h3 class="font-bold text-lg mb-4">Tambah Transaksi</h3>
+                    <input type="text" id="fin-desc" placeholder="Keterangan (misal: Jual Bibit)" class="w-full p-3 border rounded-lg mb-2">
+                    <input type="number" id="fin-amount" placeholder="Nominal (Rp)" class="w-full p-3 border rounded-lg mb-2">
+                    <select id="fin-type" class="w-full p-3 border rounded-lg mb-2">
+                        <option value="income">Pemasukan</option>
+                        <option value="expense">Pengeluaran</option>
+                    </select>
+                    <button onclick="addFinance()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">SIMPAN</button>
+                </div>
+
                 <button onclick="exportCSV()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition">Download Laporan (CSV)</button>
                 <div id="fin-list" class="bg-white p-4 rounded-2xl shadow mt-4 text-sm"></div>
             </div>
@@ -182,9 +194,21 @@
         }
 
         function addPig() {
-            state.pigs.push({ id: Date.now(), name: document.getElementById('pig-name').value, date: document.getElementById('mating-date').value });
+            const name = document.getElementById('pig-name').value;
+            const date = document.getElementById('mating-date').value;
+            if(!name || !date) return alert("Isi data!");
+            state.pigs.push({ id: Date.now(), name, date });
             saveData();
         }
+
+        function editPig(id) {
+            const p = state.pigs.find(p => p.id === id);
+            const n = prompt("Edit Nama Induk:", p.name);
+            const d = prompt("Edit Tanggal Kawin (YYYY-MM-DD):", p.date);
+            if(n && d) { p.name = n; p.date = d; saveData(); }
+        }
+
+        function deletePig(id) { if(confirm('Hapus induk ini?')) { state.pigs = state.pigs.filter(p => p.id !== id); saveData(); } }
 
         function addAnak() {
             const bD = new Date(document.getElementById('anak-birth-date').value);
@@ -197,6 +221,47 @@
             saveData();
         }
 
+        function editAnak(id) {
+            const a = state.anakBabi.find(x => x.id === id);
+            const m = prompt("Jantan:", a.male);
+            const f = prompt("Betina:", a.female);
+            if(m !== null && f !== null) { a.male = parseInt(m); a.female = parseInt(f); saveData(); }
+        }
+
+        function deleteAnak(id) { if(confirm('Hapus data anak ini?')) { state.anakBabi = state.anakBabi.filter(a => a.id !== id); saveData(); } }
+
+        function addPakan() {
+            const name = document.getElementById('pakan-name').value;
+            const qty = parseInt(document.getElementById('pakan-qty').value);
+            const price = parseInt(document.getElementById('pakan-price').value);
+            if(!name || !qty || !price) return alert("Isi data pakan!");
+            state.pakan.push({ id: Date.now(), name, qty });
+            state.transactions.push({ desc: `Beli Pakan ${name}`, amount: price, type: 'expense' });
+            saveData();
+        }
+
+        // Fungsi baru untuk menambah transaksi keuangan
+        function addFinance() {
+            const desc = document.getElementById('fin-desc').value;
+            const amount = parseInt(document.getElementById('fin-amount').value);
+            const type = document.getElementById('fin-type').value;
+            if(!desc || !amount) return alert("Isi data dengan benar!");
+            state.transactions.push({ desc, amount, type });
+            saveData();
+            // Reset input
+            document.getElementById('fin-desc').value = '';
+            document.getElementById('fin-amount').value = '';
+        }
+
+        function editPakan(id) {
+            const p = state.pakan.find(x => x.id === id);
+            const n = prompt("Nama Pakan:", p.name);
+            const q = prompt("Jumlah (Kg):", p.qty);
+            if(n && q) { p.name = n; p.qty = parseInt(q); saveData(); }
+        }
+
+        function deletePakan(id) { if(confirm('Hapus stok pakan ini?')) { state.pakan = state.pakan.filter(p => p.id !== id); saveData(); } }
+
         function openModal(id) { document.getElementById('sell-id').value = id; document.getElementById('sell-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('sell-modal').classList.add('hidden'); }
         
@@ -206,17 +271,10 @@
             const sM = parseInt(document.getElementById('sell-male').value) || 0;
             const sF = parseInt(document.getElementById('sell-female').value) || 0;
             const p = parseInt(document.getElementById('sell-price').value) || 0;
-            
             a.male -= sM; a.female -= sF;
             state.transactions.push({ desc: `Penjualan Anak (${a.parent})`, amount: p, type: 'income' });
             if(a.male <= 0 && a.female <= 0) { a.status = 'Terjual'; a.sellDate = new Date().toLocaleDateString(); }
             saveData(); closeModal();
-        }
-
-        function addPakan() {
-            state.pakan.push({ id: Date.now(), name: document.getElementById('pakan-name').value, qty: parseInt(document.getElementById('pakan-qty').value) });
-            state.transactions.push({ desc: `Beli Pakan ${document.getElementById('pakan-name').value}`, amount: parseInt(document.getElementById('pakan-price').value), type: 'expense' });
-            saveData();
         }
 
         function exportCSV() {
@@ -233,20 +291,44 @@
             document.getElementById('stat-profit').innerText = 'Rp ' + bal.toLocaleString();
             document.getElementById('stat-pakan').innerText = state.pakan.reduce((acc, p) => acc + p.qty, 0) + ' kg';
 
+            document.getElementById('pig-list').innerHTML = state.pigs.map(p => {
+                const deliveryDate = new Date(p.date); deliveryDate.setDate(deliveryDate.getDate() + 114);
+                return `<div class="bg-white p-4 rounded-xl shadow border-l-4 border-emerald-500">
+                    <p class="font-bold">${p.name}</p>
+                    <p class="text-sm">Kawin: ${p.date}</p>
+                    <p class="text-xs text-emerald-600 font-bold">Perkiraan Lahir: ${deliveryDate.toLocaleDateString()}</p>
+                    <div class="mt-2 flex gap-2">
+                        <button onclick="editPig(${p.id})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">Edit</button>
+                        <button onclick="deletePig(${p.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded font-bold">Hapus</button>
+                    </div>
+                </div>`;
+            }).join('');
+
             document.getElementById('anak-list').innerHTML = state.anakBabi.map(a => `
                 <div class="bg-white p-4 rounded-xl shadow ${a.status === 'Terjual' ? 'opacity-60 grayscale' : ''}">
                     <p class="font-bold">${a.parent}</p>
-                    <p class="text-sm">Status: ${a.status} ${a.sellDate ? '('+a.sellDate+')' : ''}</p>
+                    <p class="text-sm">Status: ${a.status}</p>
                     <p class="text-sm">J: ${a.male} | B: ${a.female}</p>
-                    <p class="text-xs text-emerald-600 font-bold mt-1">Sapih: ${a.weaningDate}</p>
-                    ${a.status === 'Aktif' ? `<button onclick="openModal(${a.id})" class="mt-2 bg-emerald-600 text-white px-4 py-1 rounded text-sm font-bold">JUAL</button>` : ''}
+                    <div class="mt-2 flex gap-2">
+                        <button onclick="editAnak(${a.id})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">Edit</button>
+                        <button onclick="deleteAnak(${a.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded font-bold">Hapus</button>
+                        ${a.status === 'Aktif' ? `<button onclick="openModal(${a.id})" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded font-bold">JUAL</button>` : ''}
+                    </div>
                 </div>`).join('');
-            document.getElementById('fin-list').innerHTML = state.transactions.map(t => `<div class="border-b p-2">${t.desc} - Rp ${t.amount.toLocaleString()} (${t.type})</div>`).join('');
-            document.getElementById('pakan-list').innerHTML = state.pakan.map(p => `<div class="bg-white p-3 rounded shadow">${p.name} (${p.qty} kg)</div>`).join('');
+
+            document.getElementById('pakan-list').innerHTML = state.pakan.map(p => `
+                <div class="bg-white p-3 rounded shadow flex justify-between items-center">
+                    <span class="font-bold">${p.name} (${p.qty} kg)</span>
+                    <div class="flex gap-2">
+                        <button onclick="editPakan(${p.id})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">Edit</button>
+                        <button onclick="deletePakan(${p.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded font-bold">Hapus</button>
+                    </div>
+                </div>`).join('');
+
+            document.getElementById('fin-list').innerHTML = state.transactions.map(t => `<div class="border-b p-2">${t.desc} - Rp ${t.amount.toLocaleString()}</div>`).join('');
             renderChart();
         }
         function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
     </script>
 </body>
 </html>
-```eof
