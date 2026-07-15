@@ -329,6 +329,34 @@
             renderChart();
         }
         function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
+        // 1. TEMPELKAN DI SINI (Variabel URL)
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyMhFBYt315RPYcsSfpfk4NkYRxgqJCVEqF0_dBDdRNIUELT820kKKUmtCtnYcHALlDvQ/exec'; 
+
+        // 2. TEMPELKAN DI SINI (Fungsi untuk mengirim data)
+        async function sendToSheet(type, data) {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, ...data })
+                });
+            } catch (e) { console.log("Gagal sync:", e); }
+        }
+
+        // 3. Kemudian, panggil fungsi ini di setiap tombol simpan, contohnya:
+        function addData(type) {
+            const data = { id: Date.now(), name: document.getElementById('p-name').value, date: document.getElementById('p-date').value };
+            state.pigs.push(data);
+            localStorage.setItem('januFarmData', JSON.stringify(state));
+            
+            // PANGGIL DI SINI
+            sendToSheet(type, data); 
+            
+            renderAll();
+        }
+
+        // ... (sisa kode lainnya)
     </script>
 </body>
 </html>
