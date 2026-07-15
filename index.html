@@ -2,8 +2,19 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>JANU HOME FARM</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Janu Farm">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#065f46">
+    
+    <!-- Embedded Manifest -->
+    <link rel="manifest" href='data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJpZCIsCiAgIm5hbWUiOiAiSmFudSBIb21lIEZhcm0iLAogICJzaG9ydF9uYW1lIjogIkphbnVGYXJtIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmZmZmZmIiwKICAidGhlbWVfY29sb3IiOiAiIzA2NWY0NiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzMwNjkvMzA2OTE3Ni5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0='>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -243,13 +254,8 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-                        x: { grid: { display: false } }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
                 }
             });
         }
@@ -261,60 +267,35 @@
             const expense = state.finance.filter(i => i.type === 'expense').reduce((a, b) => a + b.amount, 0);
             document.getElementById('stat-balance').innerText = 'Rp ' + (income - expense).toLocaleString();
             document.getElementById('stat-profit').innerText = 'Rp ' + (income - expense).toLocaleString();
-
             updateChart();
 
             document.getElementById('pig-list').innerHTML = state.pigs.map(p => {
                 const mating = new Date(p.date);
                 const birth = new Date(mating);
                 birth.setDate(birth.getDate() + 114);
-                const estLahir = birth.toISOString().split('T')[0];
-                return `
-                <div class="bg-white p-4 rounded-xl border flex flex-col justify-between gap-2 shadow-sm">
-                    <div>
-                        <b class="text-lg text-emerald-900">${p.name}</b><br>
-                        <small class="text-gray-500">Kawin: ${p.date}</small><br>
-                        <span class="text-emerald-700 font-bold text-sm">Est. Lahir: ${estLahir}</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="editItem('pigs', ${p.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm hover:bg-gray-200">Edit</button>
-                        <button onclick="jualItem('pigs', ${p.id}, '${p.name}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1 hover:bg-emerald-700">Jual</button>
-                        <button onclick="deleteItem('pigs', ${p.id})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-sm hover:bg-red-100">Hapus</button>
-                    </div>
+                return `<div class="bg-white p-4 rounded-xl border flex flex-col justify-between gap-2 shadow-sm">
+                    <div><b class="text-lg text-emerald-900">${p.name}</b><br><small class="text-gray-500">Kawin: ${p.date}</small><br><span class="text-emerald-700 font-bold text-sm">Est. Lahir: ${birth.toISOString().split('T')[0]}</span></div>
+                    <div class="flex gap-2"><button onclick="editItem('pigs', ${p.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm">Edit</button><button onclick="jualItem('pigs', ${p.id}, '${p.name}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1">Jual</button><button onclick="deleteItem('pigs', ${p.id})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-sm">Hapus</button></div>
                 </div>`;
             }).join('');
 
             document.getElementById('anak-list').innerHTML = state.anakBabi.map(a => {
                 const b = new Date(a.birthDate); b.setDate(b.getDate() + 35);
-                const sapih = b.toISOString().split('T')[0];
-                return `
-                <div class="bg-white p-4 rounded-xl border shadow-sm">
-                    <b class="text-emerald-900">Induk: ${a.parent}</b><br>
-                    <span class="text-gray-600">Jumlah: J: ${a.male} | B: ${a.female}</span><br>
-                    <span class="text-orange-600 text-sm font-bold block mt-1">Est. Sapih: ${sapih}</span>
-                    <div class="flex gap-2 mt-3">
-                        <button onclick="editItem('anakBabi', ${a.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm">Edit</button>
-                        <button onclick="jualItem('anakBabi', ${a.id}, 'Anak Babi (${a.parent})')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1">Jual</button>
-                        <button onclick="deleteItem('anakBabi', ${a.id})" class="text-red-500 text-sm">Hapus</button>
-                    </div>
+                return `<div class="bg-white p-4 rounded-xl border shadow-sm">
+                    <b class="text-emerald-900">Induk: ${a.parent}</b><br><span class="text-gray-600">J: ${a.male} | B: ${a.female}</span><br><span class="text-orange-600 text-sm font-bold block mt-1">Est. Sapih: ${b.toISOString().split('T')[0]}</span>
+                    <div class="flex gap-2 mt-3"><button onclick="editItem('anakBabi', ${a.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm">Edit</button><button onclick="jualItem('anakBabi', ${a.id}, 'Anak Babi')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1">Jual</button><button onclick="deleteItem('anakBabi', ${a.id})" class="text-red-500 text-sm">Hapus</button></div>
                 </div>`;
             }).join('');
 
             document.getElementById('pakan-list').innerHTML = state.pakan.map(p => `
                 <div class="bg-white p-4 rounded-xl border flex justify-between items-center shadow-sm">
                     <div><b class="text-emerald-900">${p.name}</b><br>${p.qty} kg - Rp ${p.price.toLocaleString()}</div>
-                    <div class="flex gap-2">
-                        <button onclick="editItem('pakan', ${p.id})" class="text-gray-500 text-sm">Edit</button>
-                        <button onclick="deleteItem('pakan', ${p.id})" class="text-red-500 text-sm">Hapus</button>
-                    </div>
+                    <div class="flex gap-2"><button onclick="editItem('pakan', ${p.id})" class="text-gray-500 text-sm">Edit</button><button onclick="deleteItem('pakan', ${p.id})" class="text-red-500 text-sm">Hapus</button></div>
                 </div>
             `).join('');
 
             document.getElementById('fin-list').innerHTML = state.finance.map(f => `
-                <div class="flex justify-between py-3 border-b border-gray-100">
-                    <span class="text-gray-700">${f.desc}</span>
-                    <span class="font-bold ${f.type === 'income' ? 'text-emerald-600' : 'text-red-600'}">${f.type === 'income' ? '+' : '-'} Rp ${f.amount.toLocaleString()}</span>
-                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100"><span class="text-gray-700">${f.desc}</span><span class="font-bold ${f.type === 'income' ? 'text-emerald-600' : 'text-red-600'}">${f.type === 'income' ? '+' : '-'} Rp ${f.amount.toLocaleString()}</span></div>
             `).join('');
         }
 
