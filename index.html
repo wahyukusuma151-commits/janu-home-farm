@@ -4,43 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JANU HOME FARM</title>
-    
-    <!-- PWA Settings -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Janu Farm">
-    <link rel="apple-touch-icon" href="https://placehold.co/192x192/065f46/white?text=JF">
-    <link rel="icon" href="https://placehold.co/192x192/065f46/white?text=JF">
-    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22JANU%20HOME%20FARM%22%2C%22short_name%22%3A%22JanuFarm%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fplacehold.co%2F192x192%2F065f46%2Fwhite%3Ftext%3DJF%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
-
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #065f46; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <!-- Login -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm border border-emerald-100">
             <h2 class="text-2xl font-bold text-emerald-900 mb-6 text-center">🐷 JANU HOME FARM</h2>
-            <input type="text" id="username" placeholder="Username (janu)" class="w-full p-3 border rounded-lg mb-4 outline-emerald-500">
-            <input type="password" id="password" placeholder="Password (12345)" class="w-full p-3 border rounded-lg mb-4 outline-emerald-500">
+            <input type="text" id="username" placeholder="Nama Pengguna (janu)" class="w-full p-3 border rounded-lg mb-4 outline-emerald-500">
+            <input type="password" id="password" placeholder="Kata Sandi (12345)" class="w-full p-3 border rounded-lg mb-4 outline-emerald-500">
             <button onclick="checkLogin()" class="w-full bg-emerald-700 text-white py-3 rounded-lg font-bold hover:bg-emerald-800 transition">MASUK</button>
         </div>
     </div>
 
-    <!-- App -->
     <div id="main-app" class="hidden min-h-screen flex flex-col md:flex-row">
         <aside class="bg-emerald-900 text-white w-full md:w-64 p-6 flex flex-col shadow-xl">
             <h1 class="text-xl font-bold mb-8">🐷 JANU HOME FARM</h1>
             <nav class="space-y-2 flex-1">
-                <button onclick="showTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-emerald-800 transition">📊 Dashboard</button>
+                <button onclick="showTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-emerald-800 transition">📊 Dasbor</button>
                 <button onclick="showTab('breeding')" class="w-full text-left p-3 rounded-xl hover:bg-emerald-800 transition">🐖 Indukan</button>
                 <button onclick="showTab('anak-babi')" class="w-full text-left p-3 rounded-xl hover:bg-emerald-800 transition">👶 Anak Babi</button>
                 <button onclick="showTab('pakan')" class="w-full text-left p-3 rounded-xl hover:bg-emerald-800 transition">🌾 Pakan</button>
@@ -51,7 +39,7 @@
 
         <main class="flex-1 p-6 md:p-10 overflow-y-auto">
             <div id="dashboard" class="tab-content active space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Dasbor</h2>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-white p-6 rounded-2xl shadow border-l-4 border-emerald-500">
                         <p class="text-gray-400 text-xs uppercase font-bold">Indukan</p>
@@ -70,10 +58,11 @@
                         <h3 id="stat-profit" class="text-2xl font-bold text-emerald-600">Rp 0</h3>
                     </div>
                 </div>
+                
                 <div class="bg-white p-6 rounded-2xl shadow">
-                    <h3 class="font-bold text-lg mb-4">Statistik Populasi</h3>
-                    <div class="max-w-xs mx-auto">
-                        <canvas id="farmChart"></canvas>
+                    <h3 class="font-bold text-gray-700 mb-4">Grafik Analisis Keuangan</h3>
+                    <div class="h-64">
+                        <canvas id="financeChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -82,6 +71,7 @@
                 <h2 class="text-2xl font-bold text-gray-800">Manajemen Indukan</h2>
                 <div class="bg-white p-6 rounded-2xl shadow">
                     <input type="text" id="pig-name" placeholder="Nama Induk" class="w-full p-3 border rounded-lg mb-2">
+                    <label class="block text-sm text-gray-600 mb-1">Tanggal Kawin:</label>
                     <input type="date" id="mating-date" class="w-full p-3 border rounded-lg mb-2">
                     <button onclick="addPig()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">SIMPAN</button>
                 </div>
@@ -89,13 +79,13 @@
             </div>
 
             <div id="anak-babi" class="tab-content space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800">Data Anak Babi</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Manajemen Anak Babi</h2>
                 <div class="bg-white p-6 rounded-2xl shadow">
                     <input type="text" id="anak-induk-ref" placeholder="Nama Induk" class="w-full p-3 border rounded-lg mb-2">
                     <input type="date" id="anak-birth-date" class="w-full p-3 border rounded-lg mb-2">
                     <div class="flex gap-2 mb-2">
-                        <input type="number" id="anak-male" placeholder="Jantan" class="w-full p-3 border rounded-lg">
-                        <input type="number" id="anak-female" placeholder="Betina" class="w-full p-3 border rounded-lg">
+                        <input type="number" id="anak-male" placeholder="Jumlah Jantan" class="w-full p-3 border rounded-lg">
+                        <input type="number" id="anak-female" placeholder="Jumlah Betina" class="w-full p-3 border rounded-lg">
                     </div>
                     <button onclick="addAnak()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">SIMPAN KELAHIRAN</button>
                 </div>
@@ -114,249 +104,214 @@
             </div>
 
             <div id="finance" class="tab-content space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800">Keuangan</h2>
-                
-                <!-- Form Tambah Saldo / Transaksi -->
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Laporan Keuangan</h2>
+                    <button onclick="exportFinancePDF()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">📥 Unduh PDF</button>
+                </div>
                 <div class="bg-white p-6 rounded-2xl shadow">
-                    <h3 class="font-bold text-lg mb-4">Tambah Transaksi</h3>
-                    <input type="text" id="fin-desc" placeholder="Keterangan (misal: Jual Bibit)" class="w-full p-3 border rounded-lg mb-2">
+                    <input type="text" id="fin-desc" placeholder="Keterangan (Contoh: Penjualan Babi)" class="w-full p-3 border rounded-lg mb-2">
                     <input type="number" id="fin-amount" placeholder="Nominal (Rp)" class="w-full p-3 border rounded-lg mb-2">
                     <select id="fin-type" class="w-full p-3 border rounded-lg mb-2">
                         <option value="income">Pemasukan</option>
                         <option value="expense">Pengeluaran</option>
                     </select>
-                    <button onclick="addFinance()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">SIMPAN</button>
+                    <button onclick="addFinance()" class="w-full bg-emerald-700 text-white p-3 rounded-lg font-bold hover:bg-emerald-800 transition">TAMBAH TRANSAKSI</button>
                 </div>
-
-                <button onclick="exportCSV()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition">Download Laporan (CSV)</button>
-                <div id="fin-list" class="bg-white p-4 rounded-2xl shadow mt-4 text-sm"></div>
+                <div id="fin-list" class="bg-white p-4 rounded-2xl shadow text-sm"></div>
             </div>
         </main>
     </div>
 
-    <!-- Modal Penjualan -->
-    <div id="sell-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h3 class="font-bold text-lg mb-4">Penjualan Anak Babi</h3>
-            <input type="hidden" id="sell-id">
-            <input type="number" id="sell-male" placeholder="Jual Jantan" class="w-full p-2 border rounded-lg mb-2">
-            <input type="number" id="sell-female" placeholder="Jual Betina" class="w-full p-2 border rounded-lg mb-2">
-            <input type="number" id="sell-price" placeholder="Harga Total (Rp)" class="w-full p-2 border rounded-lg mb-4">
-            <div class="flex gap-2">
+    <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 id="modal-title" class="font-bold text-lg mb-4">Edit Data</h3>
+            <div id="modal-body" class="space-y-3"></div>
+            <div class="flex gap-2 mt-6">
                 <button onclick="closeModal()" class="flex-1 bg-gray-200 p-2 rounded-lg font-bold">Batal</button>
-                <button onclick="confirmSale()" class="flex-1 bg-emerald-700 text-white p-2 rounded-lg font-bold">Konfirmasi</button>
+                <button id="modal-confirm" class="flex-1 bg-emerald-700 text-white p-2 rounded-lg font-bold">Simpan</button>
             </div>
         </div>
     </div>
 
     <script>
-        let state = { pigs: [], transactions: [], pakan: [], anakBabi: [] };
-        let farmChart;
+        let state = { pigs: [], anakBabi: [], pakan: [], finance: [] };
+        let financeChart = null;
+        try { const saved = localStorage.getItem('januFarmData'); if(saved) state = JSON.parse(saved); } catch(e) {}
 
-        try {
-            const saved = localStorage.getItem('januFarmData');
-            if(saved) state = JSON.parse(saved);
-        } catch(e) { localStorage.removeItem('januFarmData'); }
+        function saveData() { localStorage.setItem('januFarmData', JSON.stringify(state)); renderAll(); }
+        function showTab(t) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.getElementById(t).classList.add('active'); if(t === 'dashboard') updateChart(); }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
-        function checkLogin() { 
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            if(u === 'janu' && p === '12345') {
+        function checkLogin() {
+            if(document.getElementById('username').value === 'janu' && document.getElementById('password').value === '12345') {
                 localStorage.setItem('isLoggedIn', 'true');
-                document.getElementById('login-screen').classList.add('hidden'); 
+                document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 renderAll();
-            } else { alert('Username/Password salah!'); }
-        }
-        
-        if(localStorage.getItem('isLoggedIn')) { 
-            document.getElementById('login-screen').classList.add('hidden'); 
-            document.getElementById('main-app').classList.remove('hidden'); 
-            renderAll(); 
+            } else { alert('Gagal Masuk! Periksa kredensial Anda.'); }
         }
 
-        function showTab(t) { 
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
-            document.getElementById(t).classList.add('active'); 
-            if(t === 'dashboard') renderChart();
-        }
-        
-        function saveData() { localStorage.setItem('januFarmData', JSON.stringify(state)); renderAll(); }
+        function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
 
-        function renderChart() {
-            const ctx = document.getElementById('farmChart').getContext('2d');
-            if(farmChart) farmChart.destroy();
-            const totalAnak = state.anakBabi.reduce((acc, a) => acc + a.male + a.female, 0);
-            farmChart = new Chart(ctx, {
-                type: 'pie',
-                data: { labels: ['Indukan', 'Anak Babi'], datasets: [{ data: [state.pigs.length, totalAnak], backgroundColor: ['#059669', '#3B82F6'] }] }
+        // Core Functions
+        function addPig() { state.pigs.push({ id: Date.now(), name: document.getElementById('pig-name').value, date: document.getElementById('mating-date').value }); saveData(); }
+        function addAnak() { state.anakBabi.push({ id: Date.now(), parent: document.getElementById('anak-induk-ref').value, birthDate: document.getElementById('anak-birth-date').value, male: parseInt(document.getElementById('anak-male').value) || 0, female: parseInt(document.getElementById('anak-female').value) || 0 }); saveData(); }
+        function addPakan() { const qty = parseInt(document.getElementById('pakan-qty').value); const price = parseInt(document.getElementById('pakan-price').value); state.pakan.push({ id: Date.now(), name: document.getElementById('pakan-name').value, qty, price }); state.finance.push({ id: Date.now(), desc: 'Beli Pakan: ' + document.getElementById('pakan-name').value, amount: price, type: 'expense' }); saveData(); }
+        function addFinance() { state.finance.push({ id: Date.now(), desc: document.getElementById('fin-desc').value, amount: parseInt(document.getElementById('fin-amount').value), type: document.getElementById('fin-type').value }); saveData(); }
+
+        function exportFinancePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text("Laporan Keuangan Janu Home Farm", 14, 20);
+            doc.setFontSize(12);
+            doc.text("Tanggal: " + new Date().toLocaleDateString(), 14, 30);
+            let y = 40;
+            doc.setFontSize(10);
+            doc.text("Keterangan", 14, y);
+            doc.text("Nominal", 150, y);
+            doc.line(14, y + 2, 195, y + 2);
+            y += 10;
+            state.finance.forEach(f => {
+                doc.text(f.desc, 14, y);
+                const prefix = f.type === 'income' ? '+ ' : '- ';
+                doc.text(prefix + f.amount.toLocaleString(), 150, y);
+                y += 8;
             });
+            doc.save("Laporan_Keuangan_Janu_Farm.pdf");
         }
 
-        function addPig() {
-            const name = document.getElementById('pig-name').value;
-            const date = document.getElementById('mating-date').value;
-            if(!name || !date) return alert("Isi data!");
-            state.pigs.push({ id: Date.now(), name, date });
-            saveData();
-        }
-
-        function editPig(id) {
-            const p = state.pigs.find(p => p.id === id);
-            const n = prompt("Edit Nama Induk:", p.name);
-            const d = prompt("Edit Tanggal Kawin (YYYY-MM-DD):", p.date);
-            if(n && d) { p.name = n; p.date = d; saveData(); }
-        }
-
-        function deletePig(id) { if(confirm('Hapus induk ini?')) { state.pigs = state.pigs.filter(p => p.id !== id); saveData(); } }
-
-        function addAnak() {
-            const bD = new Date(document.getElementById('anak-birth-date').value);
-            const wD = new Date(bD); wD.setDate(wD.getDate() + 30);
-            state.anakBabi.push({ 
-                id: Date.now(), parent: document.getElementById('anak-induk-ref').value, birthDate: document.getElementById('anak-birth-date').value, 
-                weaningDate: wD.toLocaleDateString(), male: parseInt(document.getElementById('anak-male').value) || 0, 
-                female: parseInt(document.getElementById('anak-female').value) || 0, status: 'Aktif'
-            });
-            saveData();
-        }
-
-        function editAnak(id) {
-            const a = state.anakBabi.find(x => x.id === id);
-            const m = prompt("Jantan:", a.male);
-            const f = prompt("Betina:", a.female);
-            if(m !== null && f !== null) { a.male = parseInt(m); a.female = parseInt(f); saveData(); }
-        }
-
-        function deleteAnak(id) { if(confirm('Hapus data anak ini?')) { state.anakBabi = state.anakBabi.filter(a => a.id !== id); saveData(); } }
-
-        function addPakan() {
-            const name = document.getElementById('pakan-name').value;
-            const qty = parseInt(document.getElementById('pakan-qty').value);
-            const price = parseInt(document.getElementById('pakan-price').value);
-            if(!name || !qty || !price) return alert("Isi data pakan!");
-            state.pakan.push({ id: Date.now(), name, qty });
-            state.transactions.push({ desc: `Beli Pakan ${name}`, amount: price, type: 'expense' });
-            saveData();
-        }
-
-        // Fungsi baru untuk menambah transaksi keuangan
-        function addFinance() {
-            const desc = document.getElementById('fin-desc').value;
-            const amount = parseInt(document.getElementById('fin-amount').value);
-            const type = document.getElementById('fin-type').value;
-            if(!desc || !amount) return alert("Isi data dengan benar!");
-            state.transactions.push({ desc, amount, type });
-            saveData();
-            // Reset input
-            document.getElementById('fin-desc').value = '';
-            document.getElementById('fin-amount').value = '';
-        }
-
-        function editPakan(id) {
-            const p = state.pakan.find(x => x.id === id);
-            const n = prompt("Nama Pakan:", p.name);
-            const q = prompt("Jumlah (Kg):", p.qty);
-            if(n && q) { p.name = n; p.qty = parseInt(q); saveData(); }
-        }
-
-        function deletePakan(id) { if(confirm('Hapus stok pakan ini?')) { state.pakan = state.pakan.filter(p => p.id !== id); saveData(); } }
-
-        function openModal(id) { document.getElementById('sell-id').value = id; document.getElementById('sell-modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('sell-modal').classList.add('hidden'); }
+        function deleteItem(list, id) { if(confirm('Hapus data ini?')) { state[list] = state[list].filter(i => i.id !== id); saveData(); } }
         
-        function confirmSale() {
-            const id = parseInt(document.getElementById('sell-id').value);
-            const a = state.anakBabi.find(x => x.id === id);
-            const sM = parseInt(document.getElementById('sell-male').value) || 0;
-            const sF = parseInt(document.getElementById('sell-female').value) || 0;
-            const p = parseInt(document.getElementById('sell-price').value) || 0;
-            a.male -= sM; a.female -= sF;
-            state.transactions.push({ desc: `Penjualan Anak (${a.parent})`, amount: p, type: 'income' });
-            if(a.male <= 0 && a.female <= 0) { a.status = 'Terjual'; a.sellDate = new Date().toLocaleDateString(); }
-            saveData(); closeModal();
+        function editItem(list, id) {
+            const item = state[list].find(i => i.id === id);
+            const modal = document.getElementById('modal');
+            const body = document.getElementById('modal-body');
+            const confirmBtn = document.getElementById('modal-confirm');
+            modal.classList.remove('hidden');
+            
+            if(list === 'pigs') {
+                body.innerHTML = `<input type="text" id="edit-name" value="${item.name}" class="w-full p-2 border rounded"><input type="date" id="edit-date" value="${item.date}" class="w-full p-2 border rounded">`;
+                confirmBtn.onclick = () => { item.name = document.getElementById('edit-name').value; item.date = document.getElementById('edit-date').value; closeModal(); saveData(); };
+            } else if(list === 'anakBabi') {
+                body.innerHTML = `<input type="text" id="edit-parent" value="${item.parent}" class="w-full p-2 border rounded"><input type="date" id="edit-birth" value="${item.birthDate}" class="w-full p-2 border rounded"><input type="number" id="edit-male" value="${item.male}" class="w-full p-2 border rounded"><input type="number" id="edit-female" value="${item.female}" class="w-full p-2 border rounded">`;
+                confirmBtn.onclick = () => { item.parent = document.getElementById('edit-parent').value; item.birthDate = document.getElementById('edit-birth').value; item.male = parseInt(document.getElementById('edit-male').value); item.female = parseInt(document.getElementById('edit-female').value); closeModal(); saveData(); };
+            } else if(list === 'pakan') {
+                body.innerHTML = `<input type="text" id="edit-pakan-name" value="${item.name}" class="w-full p-2 border rounded"><input type="number" id="edit-pakan-qty" value="${item.qty}" class="w-full p-2 border rounded">`;
+                confirmBtn.onclick = () => { item.name = document.getElementById('edit-pakan-name').value; item.qty = parseInt(document.getElementById('edit-pakan-qty').value); closeModal(); saveData(); };
+            }
         }
 
-        function exportCSV() {
-            let csv = "Keterangan,Tipe,Nominal\n" + state.transactions.map(t => `${t.desc},${t.type},${t.amount}`).join("\n");
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'Laporan_Keuangan_JanuFarm.csv'; a.click();
+        function jualItem(list, id, name) {
+            const price = prompt("Masukkan harga jual untuk " + name + ":");
+            if(price) {
+                state.finance.push({ id: Date.now(), desc: 'Penjualan: ' + name, amount: parseInt(price), type: 'income' });
+                state[list] = state[list].filter(i => i.id !== id);
+                saveData();
+            }
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            const income = state.finance.filter(i => i.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const expense = state.finance.filter(i => i.type === 'expense').reduce((a, b) => a + b.amount, 0);
+            
+            if (financeChart) financeChart.destroy();
+            financeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pemasukan', 'Pengeluaran'],
+                    datasets: [{
+                        label: 'Total Rupiah',
+                        data: [income, expense],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderRadius: 8,
+                        barThickness: 60
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
         }
 
         function renderAll() {
             document.getElementById('stat-pigs').innerText = state.pigs.length;
-            const bal = state.transactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
-            document.getElementById('stat-balance').innerText = 'Rp ' + bal.toLocaleString();
-            document.getElementById('stat-profit').innerText = 'Rp ' + bal.toLocaleString();
-            document.getElementById('stat-pakan').innerText = state.pakan.reduce((acc, p) => acc + p.qty, 0) + ' kg';
+            document.getElementById('stat-pakan').innerText = state.pakan.reduce((a, b) => a + b.qty, 0) + ' kg';
+            const income = state.finance.filter(i => i.type === 'income').reduce((a, b) => a + b.amount, 0);
+            const expense = state.finance.filter(i => i.type === 'expense').reduce((a, b) => a + b.amount, 0);
+            document.getElementById('stat-balance').innerText = 'Rp ' + (income - expense).toLocaleString();
+            document.getElementById('stat-profit').innerText = 'Rp ' + (income - expense).toLocaleString();
+
+            updateChart();
 
             document.getElementById('pig-list').innerHTML = state.pigs.map(p => {
-                const deliveryDate = new Date(p.date); deliveryDate.setDate(deliveryDate.getDate() + 114);
-                return `<div class="bg-white p-4 rounded-xl shadow border-l-4 border-emerald-500">
-                    <p class="font-bold">${p.name}</p>
-                    <p class="text-sm">Kawin: ${p.date}</p>
-                    <p class="text-xs text-emerald-600 font-bold">Perkiraan Lahir: ${deliveryDate.toLocaleDateString()}</p>
-                    <div class="mt-2 flex gap-2">
-                        <button onclick="editPig(${p.id})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">Edit</button>
-                        <button onclick="deletePig(${p.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded font-bold">Hapus</button>
+                const mating = new Date(p.date);
+                const birth = new Date(mating);
+                birth.setDate(birth.getDate() + 114);
+                const estLahir = birth.toISOString().split('T')[0];
+                return `
+                <div class="bg-white p-4 rounded-xl border flex flex-col justify-between gap-2 shadow-sm">
+                    <div>
+                        <b class="text-lg text-emerald-900">${p.name}</b><br>
+                        <small class="text-gray-500">Kawin: ${p.date}</small><br>
+                        <span class="text-emerald-700 font-bold text-sm">Est. Lahir: ${estLahir}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editItem('pigs', ${p.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm hover:bg-gray-200">Edit</button>
+                        <button onclick="jualItem('pigs', ${p.id}, '${p.name}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1 hover:bg-emerald-700">Jual</button>
+                        <button onclick="deleteItem('pigs', ${p.id})" class="bg-red-50 text-red-600 px-3 py-1 rounded text-sm hover:bg-red-100">Hapus</button>
                     </div>
                 </div>`;
             }).join('');
 
-            document.getElementById('anak-list').innerHTML = state.anakBabi.map(a => `
-                <div class="bg-white p-4 rounded-xl shadow ${a.status === 'Terjual' ? 'opacity-60 grayscale' : ''}">
-                    <p class="font-bold">${a.parent}</p>
-                    <p class="text-sm">Status: ${a.status}</p>
-                    <p class="text-sm">J: ${a.male} | B: ${a.female}</p>
-                    <div class="mt-2 flex gap-2">
-                        <button onclick="editAnak(${a.id})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">Edit</button>
-                        <button onclick="deleteAnak(${a.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded font-bold">Hapus</button>
-                        ${a.status === 'Aktif' ? `<button onclick="openModal(${a.id})" class="text-xs bg-emerald-600 text-white px-2 py-1 rounded font-bold">JUAL</button>` : ''}
+            document.getElementById('anak-list').innerHTML = state.anakBabi.map(a => {
+                const b = new Date(a.birthDate); b.setDate(b.getDate() + 35);
+                const sapih = b.toISOString().split('T')[0];
+                return `
+                <div class="bg-white p-4 rounded-xl border shadow-sm">
+                    <b class="text-emerald-900">Induk: ${a.parent}</b><br>
+                    <span class="text-gray-600">Jumlah: J: ${a.male} | B: ${a.female}</span><br>
+                    <span class="text-orange-600 text-sm font-bold block mt-1">Est. Sapih: ${sapih}</span>
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="editItem('anakBabi', ${a.id})" class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm">Edit</button>
+                        <button onclick="jualItem('anakBabi', ${a.id}, 'Anak Babi (${a.parent})')" class="bg-emerald-600 text-white px-3 py-1 rounded text-sm flex-1">Jual</button>
+                        <button onclick="deleteItem('anakBabi', ${a.id})" class="text-red-500 text-sm">Hapus</button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
 
             document.getElementById('pakan-list').innerHTML = state.pakan.map(p => `
-                <div class="bg-white p-3 rounded shadow flex justify-between items-center">
-                    <span class="font-bold">${p.name} (${p.qty} kg)</span>
+                <div class="bg-white p-4 rounded-xl border flex justify-between items-center shadow-sm">
+                    <div><b class="text-emerald-900">${p.name}</b><br>${p.qty} kg - Rp ${p.price.toLocaleString()}</div>
                     <div class="flex gap-2">
-                        <button onclick="editPakan(${p.id})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">Edit</button>
-                        <button onclick="deletePakan(${p.id})" class="text-xs bg-red-500 text-white px-2 py-1 rounded font-bold">Hapus</button>
+                        <button onclick="editItem('pakan', ${p.id})" class="text-gray-500 text-sm">Edit</button>
+                        <button onclick="deleteItem('pakan', ${p.id})" class="text-red-500 text-sm">Hapus</button>
                     </div>
-                </div>`).join('');
+                </div>
+            `).join('');
 
-            document.getElementById('fin-list').innerHTML = state.transactions.map(t => `<div class="border-b p-2">${t.desc} - Rp ${t.amount.toLocaleString()}</div>`).join('');
-            renderChart();
-        }
-        function logout() { localStorage.removeItem('isLoggedIn'); location.reload(); }
-        // 1. TEMPELKAN DI SINI (Variabel URL)
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyMhFBYt315RPYcsSfpfk4NkYRxgqJCVEqF0_dBDdRNIUELT820kKKUmtCtnYcHALlDvQ/exec'; 
-
-        // 2. TEMPELKAN DI SINI (Fungsi untuk mengirim data)
-        async function sendToSheet(type, data) {
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type, ...data })
-                });
-            } catch (e) { console.log("Gagal sync:", e); }
+            document.getElementById('fin-list').innerHTML = state.finance.map(f => `
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-gray-700">${f.desc}</span>
+                    <span class="font-bold ${f.type === 'income' ? 'text-emerald-600' : 'text-red-600'}">${f.type === 'income' ? '+' : '-'} Rp ${f.amount.toLocaleString()}</span>
+                </div>
+            `).join('');
         }
 
-        // 3. Kemudian, panggil fungsi ini di setiap tombol simpan, contohnya:
-        function addData(type) {
-            const data = { id: Date.now(), name: document.getElementById('p-name').value, date: document.getElementById('p-date').value };
-            state.pigs.push(data);
-            localStorage.setItem('januFarmData', JSON.stringify(state));
-            
-            // PANGGIL DI SINI
-            sendToSheet(type, data); 
-            
+        if(localStorage.getItem('isLoggedIn')) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
             renderAll();
         }
-
-        // ... (sisa kode lainnya)
     </script>
 </body>
 </html>
